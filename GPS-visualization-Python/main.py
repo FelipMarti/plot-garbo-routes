@@ -44,7 +44,7 @@ def main(argv):
         outputfile=os.path.abspath(inputfolder) + '.eps'
     print('Output file is ' + outputfile)
 
-    script_path = os.path.dirname(__file__)
+    script_path = os.path.dirname(sys.argv[0])
     map_path = script_path + '/' + 'map.png'
     print(map_path)
     vis = GPSVis(title=graph_title,

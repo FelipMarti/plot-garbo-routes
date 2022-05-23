@@ -35,7 +35,7 @@ function get_day_to_download()
     dow=`date +%u`
     if [ $dow -eq 1 ]; then
         # Monday we get data from Friday
-        echo `date --date="3 day ago" +%F`
+        echo `date --date="3 days ago" +%F`
     elif [ $dow -gt 1 ] && [ $dow -lt 6 ]; then
         # Tue to Fri we get data from previous day
         echo `date --date="1 day ago" +%F`
@@ -52,13 +52,17 @@ if [ "$DATE" = "" ]; then
 fi
 
 USER=garbo
-FOLDER=$DATE
-SERVERS_FAIL_FILE=$FOLDER/$FOLDER-servers.fail
+DATA_FOLDER=~/Data/garbo-GPS
+TODAYS_DATE=$DATE
+SERVERS_FAIL_FILE=$DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-servers.fail
 SCRIPT_PATH=$(realpath $0)
 ERROR=0
 
+PYTHON_BIN=/usr/bin/python3 
+PLOT_SCRIPT=~/Code/plot-garbo-routes/GPS-visualization-Python/main.py 
+REMOTE_FOLDER_PATH=OneDrive:Projects/2021-5G/2021-5G-Brimbank-Data/Garbos-GPS
 
-mkdir -p $FOLDER
+mkdir -p $DATA_FOLDER/$TODAYS_DATE
 
 # Checking if the script has been executed today with errors
 # to download only from servers that were unsuccessful.
@@ -85,7 +89,7 @@ for server in "${servers[@]}"; do
 
     if ping -c1 -W1 $IP &> /dev/null; then
         echo -e "$HOST ($IP) is \e[1;32mUP\e[0;39m, executing commands"
-	    scp $USER@$IP:log/$FOLDER-garbo*-GPS.log $FOLDER
+	    scp $USER@$IP:log/$TODAYS_DATE-garbo*-GPS.log $DATA_FOLDER/$TODAYS_DATE
         if [ $? -eq 0 ]; then
             # File downloaded, removing server from the list
             unset servers[$NUM_ID]
@@ -113,10 +117,16 @@ if [ $ERROR -ne 0 ] && [ $HOUR -lt 10 ]; then
 else
     # Script finished with no errors 
     # or it is later than 10am 
-    echo "NO Error or later than 10. Plotting"
+    echo "NO Error or later than 10 am. Plotting"
 
     # Update list of servers
     set | grep ^servers= > $SERVERS_FAIL_FILE
-    # We need to plot files
+
+    # Plotting files
+    $PYTHON_BIN $PLOT_SCRIPT -f $DATA_FOLDER/$TODAYS_DATE
+
+    # Copying to OneDrive, log files and .eps
+    rclone copy $DATA_FOLDER/$TODAYS_DATE $REMOTE_FOLDER_PATH/$TODAYS_DATE 
+    rclone copy $DATA_FOLDER/$TODAYS_DATE.eps $REMOTE_FOLDER_PATH/$TODAYS_DATE 
 
 fi

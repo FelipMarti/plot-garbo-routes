@@ -45,7 +45,7 @@ class GPSVis(object):
         title = self.title
         axis1.title.set_text(title)
         if output == 'save':
-            plt.savefig(save_as , format='eps', dpi=800)
+            plt.savefig(save_as , format='eps', dpi=400)
         else:
             plt.show()
 
