@@ -31,9 +31,10 @@ def main(argv):
 
     if inputfile:
         print('Input file is ' + inputfile)
-        graph_title = os.path.splitext(inputfile)[0]
+        graph_title = os.path.basename(inputfile) 
+        graph_title = os.path.splitext(graph_title)[0]
     elif inputfolder:
-        graph_title = inputfolder
+        graph_title = os.path.basename(inputfolder)
         print('Input folder is ' + inputfolder)
 
     if not outputfile and inputfile:
@@ -43,12 +44,15 @@ def main(argv):
         outputfile=os.path.abspath(inputfolder) + '.eps'
     print('Output file is ' + outputfile)
 
+    script_path = os.path.dirname(__file__)
+    map_path = script_path + '/' + 'map.png'
+    print(map_path)
     vis = GPSVis(title=graph_title,
-            map_path='map.png',  # Path to map downloaded from the OSM.
+            map_path=map_path,  # Path to map downloaded from the OSM.
             points=(-37.68, 144.75, -37.825, 144.89)) # Two coordinates of the map (upper left, lower right)
 
     if inputfile:
-        vis.create_image(data_path=inputfile, color=(0, 0, 255), width=3)  # Set the color and the width of the GNSS tracks.
+        vis.create_image(data_path=inputfile, color='blue', width=3)  # Set the color and the width of the GNSS tracks.
 
     elif inputfolder:
         colours = ['blue', 'red', 'orange', 'darkgreen' ,'magenta', 'purple', 'coral', 'cornflowerblue', 'limegreen', 'darkorchid', 'gold', 'steelblue', 'yellowgreen', 'chocolate', 'teal']

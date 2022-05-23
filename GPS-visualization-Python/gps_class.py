@@ -40,7 +40,7 @@ class GPSVis(object):
         axis1.set_ylabel('Latitude')
         axis1.set_xticklabels(self.x_ticks)
         axis1.set_yticklabels(self.y_ticks)
-        axis1.grid()
+#        axis1.grid()
         axis1.legend(handles=self.legend, loc='center right')
         title = self.title
         axis1.title.set_text(title)
