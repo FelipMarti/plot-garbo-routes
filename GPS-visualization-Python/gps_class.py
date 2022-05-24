@@ -63,10 +63,20 @@ class GPSVis(object):
         legend = data['TRUCK'][0]
         gps_data = tuple(zip(data['LATITUDE'].values, data['LONGITUDE'].values))
         for d in gps_data:
-            # Filtering out invalid GPS data indicated as > 90 and > 180
-            if  (d[0] <= 90) and (d[1] <= 180) :
-                x1, y1 = self.scale_to_img(d, (self.result_image.size[0], self.result_image.size[1]))
-                img_points.append((x1, y1))
+            # Sometimes negative floats are considered string.
+            # Float conversion of not floats (e.g., data corrupted) will throw an error
+            try:
+                lat = float(d[0])
+                lon = float(d[1])
+                lat_lon = (lat,lon)
+                # Filtering out invalid GPS data indicated as > 90 and > 180
+                if  (lat <= 90) and (lon <= 180):
+                    x1, y1 = self.scale_to_img(lat_lon, (self.result_image.size[0], self.result_image.size[1]))
+                    img_points.append((x1, y1))
+            except:
+                print("Ignoring line for values not being float: " + str(d[0]) + " and "+ str(d[1]))
+                print (type(d[0]))
+                print (type(d[1]))
 
         patch = mpatches.Patch(color=color, label=legend)
         self.legend.append(patch)

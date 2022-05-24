@@ -12,20 +12,20 @@ echo
 # "ID NameHost IPAddrs"
 # ID counting from 0 to N so we can remove it from the array when ends OK
 declare -a servers=(
-    "0 Garbo01 172.16.50.1"
-    "1 Garbo02 172.16.50.2"
-    "2 Garbo03 172.16.50.3"
-    "3 Garbo04 172.16.50.4"
-    "4 Garbo05 172.16.50.5"
-    "5 Garbo06 172.16.50.6"
-    "6 Garbo07 172.16.50.7"
-    "7 Garbo08 172.16.50.8"
-    "8 Garbo09 172.16.50.9"
-    "9 Garbo10 172.16.50.10"
-    "10 Garbo11 172.16.50.11"
-    "11 Garbo12 172.16.50.12"
-    "12 Garbo13 172.16.50.13"
-    "13 Garbo14 172.16.50.14"
+    "0 garbo01 172.16.50.1"
+    "1 garbo02 172.16.50.2"
+    "2 garbo03 172.16.50.3"
+    "3 garbo04 172.16.50.4"
+    "4 garbo05 172.16.50.5"
+    "5 garbo06 172.16.50.6"
+    "6 garbo07 172.16.50.7"
+    "7 garbo08 172.16.50.8"
+    "8 garbo09 172.16.50.9"
+    "9 garbo10 172.16.50.10"
+    "10 garbo11 172.16.50.11"
+    "11 garbo12 172.16.50.12"
+#    "12 garbo13 172.16.50.13"
+#    "13 garbo14 172.16.50.14"
 )
 
 
@@ -72,7 +72,7 @@ fi
 
 
 echo
-echo -e "Downloading GPS log files for all Garbos UP: \e[1;33m$FOLDER\e[0;39m"
+echo -e "Downloading GPS log files for all Garbos UP: \e[1;33m$TODAYS_DATE\e[0;39m"
 echo
 echo -e "Waiting 5 seconds"
 echo
@@ -89,8 +89,12 @@ for server in "${servers[@]}"; do
 
     if ping -c1 -W1 $IP &> /dev/null; then
         echo -e "$HOST ($IP) is \e[1;32mUP\e[0;39m, executing commands"
-	    scp $USER@$IP:log/$TODAYS_DATE-garbo*-GPS.log $DATA_FOLDER/$TODAYS_DATE
+	    scp $USER@$IP:log/$TODAYS_DATE-$HOST-GPS.log $DATA_FOLDER/$TODAYS_DATE
         if [ $? -eq 0 ]; then
+            # Clean file from possible binaries
+            tr -cd '\11\12\15\40-\176' < $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log > $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log.filtered
+            mv $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log.filtered $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log
+
             # File downloaded, removing server from the list
             unset servers[$NUM_ID]
             echo ${servers[@]}
