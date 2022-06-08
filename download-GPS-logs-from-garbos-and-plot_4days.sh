@@ -89,13 +89,24 @@ for server in "${servers[@]}"; do
 
     if ping -c1 -W1 $IP &> /dev/null; then
         echo -e "$HOST ($IP) is \e[1;32mUP\e[0;39m, executing commands"
-	    scp $USER@$IP:log/$TODAYS_DATE-$HOST-GPS.log $DATA_FOLDER/$TODAYS_DATE
-        if [ $? -eq 0 ]; then
+        rsync -q $USER@$IP:log/$TODAYS_DATE-$HOST-GPS.log $DATA_FOLDER/$TODAYS_DATE 2>$DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST.rsyncerror 1>/dev/null
+        E_RSYNC=$?
+        if [ $E_RSYNC -eq 0 ]; then
+            # File downloaded, rsyncerror file is empty, deleting
+            rm $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST.rsyncerror
+
             # Clean file from possible binaries
             tr -cd '\11\12\15\40-\176' < $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log > $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log.filtered
             mv $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log.filtered $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST-GPS.log
 
             # File downloaded, removing server from the list
+            unset servers[$NUM_ID]
+            echo ${servers[@]}
+        elif [ $E_RSYNC -eq 23 ]; then
+            # File NOT downloaded because it does not exist 
+            echo "log/$TODAYS_DATE-$HOST-GPS.log does NOT EXIST" >> $DATA_FOLDER/$TODAYS_DATE/$TODAYS_DATE-$HOST.rsyncerror
+
+            # Removing server from the list
             unset servers[$NUM_ID]
             echo ${servers[@]}
         else
