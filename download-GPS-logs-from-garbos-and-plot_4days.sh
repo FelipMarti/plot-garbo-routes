@@ -33,12 +33,12 @@ function get_day_to_download()
 {
     # We need to get the previous day, but not weekends
     dow=`date +%u`
-    if [ $dow -eq 1 ]; then
-        # Monday we get data from Friday
-        echo `date --date="3 days ago" +%F`
-    elif [ $dow -gt 1 ] && [ $dow -lt 6 ]; then
-        # Tue to Fri we get data from previous day
-        echo `date --date="1 day ago" +%F`
+    if [ $dow -le 4 ]; then
+        # Mon to Thr, we get data from Tues to Friday (6 days ago)
+        echo `date --date="6 days ago" +%F`
+    elif [ $dow -gt 4 ] && [ $dow -lt 6 ]; then
+        # Fri we get data from previous 4 days
+        echo `date --date="4 days ago" +%F`
     else
         # Weekend. Garbos are off, we don't get data.
         exit 0 
@@ -112,8 +112,8 @@ done
 
 
 HOUR=`date +%H` 
-if [ $ERROR -ne 0 ] && [ $HOUR -lt 10 ]; then
-    # Errors found and less than 10 am
+if [ $ERROR -ne 0 ] && [ $HOUR -lt 8 ]; then
+    # Errors found and less than 8 am
     # Update list of servers
     set | grep ^servers= > $SERVERS_FAIL_FILE
 
@@ -121,8 +121,8 @@ if [ $ERROR -ne 0 ] && [ $HOUR -lt 10 ]; then
     echo $SCRIPT_PATH | at now + 5 min 
 else
     # Script finished with no errors 
-    # or it is later than 10am 
-    echo "NO Error or later than 10 am. Plotting"
+    # or it is later than 8am 
+    echo "NO Error or later than 8 am. Plotting"
 
     # Update list of servers
     set | grep ^servers= > $SERVERS_FAIL_FILE
